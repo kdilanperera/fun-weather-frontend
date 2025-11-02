@@ -82,7 +82,7 @@ export default function App() {
   function onCheck() {
     if (!typed.trim()) return setError("Please type a city");
     if (sameCity) {
-      setCard({ joke: `😂 You are literally in ${typed}. Just go look outside!` });
+      setCard({ joke: `You are literally in ${typed}. Just go touch some grass bro.` });
       setError(null);
       return;
     }
