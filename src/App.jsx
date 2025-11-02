@@ -51,33 +51,45 @@ export default function App() {
     return detected.name.toLowerCase().trim() === typed.toLowerCase().trim();
   }, [detected, typed]);
 
-  async function fetchWeatherForCity(name) {
-    setError(null);
-    setLoading(true);
-    setCard(null);
-    try {
-      const g = await fetch(`${API_BASE}/geocode?name=${encodeURIComponent(name)}`);
-      if (!g.ok) throw new Error("City not found");
-      const place = await g.json(); // {name, lat, lon, country}
-
-      const w = await fetch(`${API_BASE}/weather?lat=${place.lat}&lon=${place.lon}`);
-      if (!w.ok) throw new Error("Weather fetch failed");
-      const data = await w.json();
-
-      const cur = data.current;
-      setCard({
-        title: `${place.name}${place.country ? ` (${place.country})` : ""}`,
-        desc: weatherText(cur.weather_code),
-        temp: Math.round(cur.temperature_2m),
-        feels: Math.round(cur.apparent_temperature),
-        wind: Math.round(cur.wind_speed_10m)
-      });
-    } catch (e) {
-      setError(e.message || "Something went wrong");
-    } finally {
-      setLoading(false);
+async function fetchWeatherForCity(name) {
+  setError(null);
+  setLoading(true);
+  setCard(null);
+  try {
+    // Geocode
+    const g = await fetch(`${API_BASE}/geocode?name=${encodeURIComponent(name)}`);
+    if (!g.ok) {
+      // Try to read the backend's JSON error
+      let msg = "City not found";
+      try {
+        const j = await g.json();
+        if (j?.error) msg = j.error;
+      } catch {}
+      throw new Error(msg);
     }
+    const place = await g.json(); // {name, lat, lon, country}
+
+    // Weather
+    const w = await fetch(`${API_BASE}/weather?lat=${place.lat}&lon=${place.lon}`);
+    if (!w.ok) throw new Error("Weather fetch failed");
+    const data = await w.json();
+
+    const cur = data.current;
+    setCard({
+      title: `${place.name}${place.country ? ` (${place.country})` : ""}`,
+      desc: weatherText(cur.weather_code),
+      temp: Math.round(cur.temperature_2m),
+      feels: Math.round(cur.apparent_temperature),
+      wind: Math.round(cur.wind_speed_10m),
+    });
+  } catch (e) {
+    setCard(null);
+    setError(e.message || "Something went wrong");
+  } finally {
+    setLoading(false);
   }
+}
+
 
   function onCheck() {
     if (!typed.trim()) return setError("Please type a city");
