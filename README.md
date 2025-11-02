@@ -1,6 +1,6 @@
-##The site is live here https://luminous-basbousa-b25ec4.netlify.app/
+## The site is live here https://luminous-basbousa-b25ec4.netlify.app/
 
-#Frontend is on netify and backend is on Render
+# Frontend is on netify and backend is on Render
 
 # React + Vite
 
